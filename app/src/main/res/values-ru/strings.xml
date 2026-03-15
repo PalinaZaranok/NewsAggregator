@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Новостной агрегатор</string>
+    <string name="apply">Применить</string>
+    <string name="choose_language">Выбрать язык</string>
+    <string name="choose_theme">Выбрать тему</string>
+    <string name="dark">Темная</string>
+    <string name="english">Английский</string>
+    <string name="light">Светлая</string>
+    <string name="russian">Русский</string>
+    <string name="settings">Настройки</string>
+    <string name="system">Система</string>
+    <string name="title">Название</string>
+    <string name="description">Описание</string>
+    <string name="date">Дата</string>
+    <string name="save">Сохранить</string>
+    <string name="edit">Изменить</string>
+    <string name="delete">Удалить</string>
+    <string name="add">Добавить</string>
+</resources>

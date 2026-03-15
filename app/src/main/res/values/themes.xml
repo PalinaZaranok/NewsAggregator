@@ -1,0 +1,20 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.MyApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <!-- Тема для сплеш-экрана -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+
+        <!-- Продолжительность анимации иконки (если она анимирована) -->
+        <!-- <item name="windowSplashScreenAnimationDuration">1000</item> -->
+
+        <item name="postSplashScreenTheme">@style/Base.Theme.MyApp</item>
+    </style>
+
+    <style name="Theme.MyApp" parent="Base.Theme.MyApp" />
+</resources>
