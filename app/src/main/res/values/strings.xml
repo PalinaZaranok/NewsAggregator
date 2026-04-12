@@ -17,4 +17,6 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="add">Add</string>
+    <string name="news_feed">News Feed</string>
+    <string name="news_api_key">7d3c565382e446afbd4c1441349a1672</string>
 </resources>

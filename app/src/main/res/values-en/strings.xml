@@ -17,4 +17,5 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="add">Add</string>
+    <string name="news_feed">News Feed</string>
 </resources>

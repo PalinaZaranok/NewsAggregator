@@ -1,25 +1,31 @@
 package com.example.myapp.model
 
-import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import android.content.Context
 
-@Database(entities = [NewsEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [NewsEntity::class, ApiNewsEntity::class],
+    version = 2,
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun newsDao(): NewsDao
+    abstract fun apiNewsDao(): ApiNewsDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "news_database"
-                ).build()
+                                context.applicationContext,
+                                AppDatabase::class.java,
+                                "news_database"
+                            ).fallbackToDestructiveMigration(false)
+                    .build()
                 INSTANCE = instance
                 instance
             }

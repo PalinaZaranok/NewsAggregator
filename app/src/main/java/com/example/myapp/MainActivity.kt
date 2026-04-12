@@ -30,7 +30,7 @@ class MainActivity : BaseActivity() {
     private val viewModel: SavedNewsViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                val database = AppDatabase.getDatabase(applicationContext)
+                val database = AppDatabase.getInstance(applicationContext)
                 val repository = NewsRepository(database.newsDao())
                 return SavedNewsViewModel(repository) as T
             }
@@ -53,6 +53,10 @@ class MainActivity : BaseActivity() {
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.btnNewsFeed).setOnClickListener {
+            startActivity(Intent(this, NewFeedActivity::class.java))
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

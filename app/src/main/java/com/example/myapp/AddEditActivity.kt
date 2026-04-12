@@ -32,7 +32,7 @@ class AddEditActivity : AppCompatActivity() {
         etDate = findViewById(R.id.etDate)
         btnSave = findViewById(R.id.btnSave)
 
-        val database = AppDatabase.getDatabase(this)
+        val database = AppDatabase.getInstance(this)
         repository = NewsRepository(database.newsDao())
 
         newsId = intent.getIntExtra("news_id", 0)
