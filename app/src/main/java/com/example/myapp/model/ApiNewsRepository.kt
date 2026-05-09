@@ -42,10 +42,8 @@ class ApiNewsRepository(private val context: Context) {
                     dao.insertAll(newsEntities)
                 }
             } catch (e: Exception) {
-                // Ошибка сети или API – игнорируем, остаются старые данные из кэша
                 e.printStackTrace()
             }
         }
-        // Если сети нет – ничего не делаем, данные остаются из БД (кэш)
     }
 }
