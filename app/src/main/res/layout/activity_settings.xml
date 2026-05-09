@@ -65,6 +65,35 @@
             android:text="@string/russian" />
     </RadioGroup>
 
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Daily Notification Time"
+        android:textSize="18sp"
+        android:layout_marginTop="24dp" />
+
+    <TimePicker
+        android:id="@+id/timePicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/btnScheduleNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Schedule Notification"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:id="@+id/tvNotificationStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Not scheduled"
+        android:textSize="14sp" />
+
     <Button
         android:id="@+id/btnApply"
         android:layout_width="wrap_content"

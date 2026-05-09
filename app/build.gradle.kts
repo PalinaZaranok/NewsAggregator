@@ -1,12 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.myapp"
     compileSdk = 36
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.example.myapp"
@@ -16,6 +24,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Чтение API-ключа из local.properties
+        val localProperties = Properties()
+        val localFile = rootProject.file("local.properties")
+        if (localFile.exists()) {
+            localProperties.load(localFile.inputStream())
+        }
+        val newsApiKey = localProperties.getProperty("NEWS_API_KEY", "")
+
+        // Один buildConfigField (убрал дублирование)
+        buildConfigField("String", "NEWS_API_KEY", "\"$newsApiKey\"")
     }
 
     buildTypes {
@@ -36,34 +55,49 @@ android {
     }
 }
 
+// Настройки kapt упрощены (убраны лишние опции, которые могут мешать)
 kapt {
-    javacOptions {
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
-        option("-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED")
-    }
+    correctErrorTypes = true
 }
 
 dependencies {
+    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Firebase (через BOM, чтобы версии были согласованы)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-firestore")
+
+    // SplashScreen
+    implementation("androidx.core:core-splashscreen:1.2.0")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.7.0")
+    kapt("androidx.room:room-compiler:2.7.0")
+    implementation("androidx.room:room-ktx:2.7.0")
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+
+    // Retrofit, OkHttp
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // SwipeRefreshLayout
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Тесты
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation("androidx.core:core-splashscreen:1.2.0")
-    implementation("androidx.room:room-runtime:2.7.0")
-    kapt("androidx.room:room-compiler:2.7.0")
-    implementation("androidx.room:room-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 }
