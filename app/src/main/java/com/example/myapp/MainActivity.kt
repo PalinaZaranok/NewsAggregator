@@ -2,14 +2,12 @@ package com.example.myapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import androidx.appcompat.widget.SearchView
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
@@ -22,14 +20,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapp.model.AppDatabase
+import com.example.myapp.model.NewsEntity
 import com.example.myapp.model.NewsRepository
+import com.example.myapp.repository.FirebaseRepository
 import com.example.myapp.ui.NewsAdapter
 import com.example.myapp.ui.SavedNewsViewModel
 import com.example.myapp.ui.SortType
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
@@ -47,7 +47,11 @@ class MainActivity : BaseActivity() {
         object : ViewModelProvider.Factory {
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
                 val database = AppDatabase.getInstance(applicationContext)
-                val repository = NewsRepository(database.newsDao())
+                val repository = NewsRepository(
+                    newsDao = database.newsDao(),
+                    firebaseRepo = FirebaseRepository(),
+                    scope = CoroutineScope(Dispatchers.IO)
+                )
                 return SavedNewsViewModel(repository) as T
             }
         }
@@ -73,7 +77,6 @@ class MainActivity : BaseActivity() {
         setupSortSpinner()
         setupFilterButton()
 
-        testFirestoreConnection()
 
 
         findViewById<Button>(R.id.btnSettings).setOnClickListener {
@@ -89,6 +92,11 @@ class MainActivity : BaseActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (!userId.isNullOrEmpty()) {
+            viewModel.repository.startRealtimeUpdates(userId)
+        }
     }
 
     private fun setupRecyclerView() {
@@ -101,7 +109,8 @@ class MainActivity : BaseActivity() {
             },
             onDeleteClick = { news ->
                 viewModel.deleteNews(news)
-            }
+            },
+            onShareClick = {news -> shareNews(news)}
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
@@ -187,21 +196,18 @@ class MainActivity : BaseActivity() {
             .show()
     }
 
-    private fun testFirestoreConnection() {
-        val db = FirebaseFirestore.getInstance()
-        val testData = hashMapOf("testMessage" to "Привет, Firebase! Это тестовая запись!")
-
-        db.collection("test_collection")
-            .document("test_document")
-            .set(testData)
-            .addOnSuccessListener {
-                Log.d("FirebaseTest", "✅ УСПЕХ! Документ успешно создан!")
-                Toast.makeText(this, "Firestore работает!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Log.e("FirebaseTest", "❌ ОШИБКА: ${e.message}")
-                Toast.makeText(this, "Ошибка Firestore: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+    private fun shareNews(news: NewsEntity) {
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, "${news.title}\n${news.description}\nDate: ${news.date}")
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(sendIntent, "Share via"))
     }
 
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.repository.stopRealtimeUpdates()
+    }
 }

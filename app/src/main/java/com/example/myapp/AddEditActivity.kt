@@ -1,6 +1,8 @@
 package com.example.myapp
 
+import android.Manifest
 import android.content.ContentResolver
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +16,8 @@ import com.example.myapp.model.AppDatabase
 import com.example.myapp.model.NewsEntity
 import com.example.myapp.model.NewsRepository
 import com.example.myapp.repository.FirebaseRepository
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -24,6 +28,7 @@ class AddEditActivity : AppCompatActivity() {
     private lateinit var repository: NewsRepository
     private lateinit var firebaseRepo: FirebaseRepository
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var newsId: Int = 0
     private var existingImageUrl: String? = null
     private var existingFirestoreId: String? = null
@@ -45,7 +50,11 @@ class AddEditActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val database = AppDatabase.getInstance(this)
-        repository = NewsRepository(database.newsDao())
+        repository = NewsRepository(
+            newsDao = database.newsDao(),
+            firebaseRepo = FirebaseRepository(),
+            scope = lifecycleScope
+        )
         firebaseRepo = FirebaseRepository()
 
         newsId = intent.getIntExtra("news_id", 0)
@@ -60,6 +69,11 @@ class AddEditActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener {
             saveNews()
+        }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        binding.btnGetLocation.setOnClickListener {
+            getCurrentLocation()
         }
     }
 
@@ -82,47 +96,6 @@ class AddEditActivity : AppCompatActivity() {
         }
     }
 
-    /*
-    private fun saveNews() {
-        val title = binding.etTitle.text.toString().trim()
-        val description = binding.etDescription.text.toString().trim()
-        val date = binding.etDate.text.toString().trim()
-
-        if (title.isEmpty() || description.isEmpty() || date.isEmpty()) {
-            Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        lifecycleScope.launch {
-            var imagePath = existingImageUrl
-
-            selectedImageUri?.let { uri ->
-                deleteOldImage(existingImageUrl)
-                imagePath = saveImageLocally(uri)
-            }
-
-            val article = NewsEntity(
-                id = newsId,
-                title = title,
-                description = description,
-                date = date,
-                imageUrl = imagePath,
-                firestoreId = existingFirestoreId
-            )
-
-            if (newsId == 0) {
-                repository.insert(article)
-            } else {
-                repository.update(article)
-            }
-
-            Toast.makeText(this@AddEditActivity, getString(R.string.saved), Toast.LENGTH_SHORT).show()
-            finish()
-        }
-    }
-
-
-     */
     private fun saveNews() {
         val title = binding.etTitle.text.toString().trim()
         val description = binding.etDescription.text.toString().trim()
@@ -155,7 +128,6 @@ class AddEditActivity : AppCompatActivity() {
                     firestoreId = existingFirestoreId
                 )
 
-                // Сохраняем в Room
                 if (newsId == 0) {
                     repository.insert(article)
                     Log.d("AddEditActivity", "Inserted new article")
@@ -206,6 +178,28 @@ class AddEditActivity : AppCompatActivity() {
         if (!path.isNullOrEmpty()) {
             val file = File(path)
             if (file.exists()) file.delete()
+        }
+    }
+
+    private fun getCurrentLocation() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 200)
+            return
+        }
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val locText = "Lat: ${location.latitude}, Lon: ${location.longitude}"
+                binding.etDescription.append("\nLocation: $locText")
+            } else {
+                Toast.makeText(this, "Unable to get location", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 200 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation()
         }
     }
 }

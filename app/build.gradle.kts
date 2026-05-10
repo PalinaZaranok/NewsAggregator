@@ -25,7 +25,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Чтение API-ключа из local.properties
         val localProperties = Properties()
         val localFile = rootProject.file("local.properties")
         if (localFile.exists()) {
@@ -33,7 +32,6 @@ android {
         }
         val newsApiKey = localProperties.getProperty("NEWS_API_KEY", "")
 
-        // Один buildConfigField (убрал дублирование)
         buildConfigField("String", "NEWS_API_KEY", "\"$newsApiKey\"")
     }
 
@@ -55,7 +53,7 @@ android {
     }
 }
 
-// Настройки kapt упрощены (убраны лишние опции, которые могут мешать)
+
 kapt {
     correctErrorTypes = true
 }
@@ -69,15 +67,17 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Firebase (через BOM, чтобы версии были согласованы)
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
 
     // SplashScreen
     implementation("androidx.core:core-splashscreen:1.2.0")
 
     // Room
     implementation("androidx.room:room-runtime:2.7.0")
+    implementation(libs.play.services.location)
     kapt("androidx.room:room-compiler:2.7.0")
     implementation("androidx.room:room-ktx:2.7.0")
 

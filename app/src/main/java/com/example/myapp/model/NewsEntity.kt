@@ -12,5 +12,6 @@ data class NewsEntity(
     val description: String,
     val date: String,
     val imageUrl: String? = null,
-    val firestoreId: String? = null
+    val firestoreId: String? = null,
+    val userId: String? = null
 )
