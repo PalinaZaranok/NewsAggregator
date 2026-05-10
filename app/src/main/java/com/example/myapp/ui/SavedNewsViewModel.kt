@@ -14,7 +14,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class SavedNewsViewModel(private val repository: NewsRepository) : ViewModel() {
+class SavedNewsViewModel(val repository: NewsRepository) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
     private val _sortType = MutableStateFlow(SortType.DATE_DESC)

@@ -2,20 +2,19 @@ package com.example.myapp.model
 
 import android.util.Log
 import com.example.myapp.repository.FirebaseRepository
+import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 
 class NewsRepository(
     private val newsDao: NewsDao,
-    private val firebaseRepo: FirebaseRepository = FirebaseRepository()
+    private val firebaseRepo: FirebaseRepository = FirebaseRepository(),
+    private val scope: CoroutineScope
 ) {
     val allNews: Flow<List<NewsEntity>> = newsDao.getAllNews()
 
-    /*
-    suspend fun insert(news: NewsEntity) {
-        newsDao.insert(news)
-    }
-
-     */
+    private var snapshotListenerRegistration: ListenerRegistration? = null
 
     suspend fun insert(news: NewsEntity) {
         try {
@@ -37,20 +36,25 @@ class NewsRepository(
 
     suspend fun getNewsById(id: Int): NewsEntity? = newsDao.getNewsById(id)
 
-    /*
-    suspend fun syncWithFirebase() {
-        val remote = firebaseRepo.getAllArticles()
-        newsDao.deleteAll()
-        newsDao.insertAll(remote.map { it.copy(id = 0) })
-    }
-
-     */
-
     suspend fun pushToFirebase(article: NewsEntity): String {
         val firestoreId = firebaseRepo.saveArticle(article)
         if (article.id != 0) {
             newsDao.updateFirestoreId(article.id, firestoreId)
         }
         return firestoreId
+    }
+
+    fun startRealtimeUpdates(userId: String) {
+        snapshotListenerRegistration = firebaseRepo.observeArticles(userId) { remoteArticles ->
+            scope.launch {
+                newsDao.deleteAll()
+                newsDao.insertAll(remoteArticles.map { it.copy(id = 0) })
+            }
+        }
+    }
+
+    fun stopRealtimeUpdates() {
+        snapshotListenerRegistration?.remove()
+        snapshotListenerRegistration = null
     }
 }

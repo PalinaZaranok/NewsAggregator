@@ -3,6 +3,7 @@ package com.example.myapp.ui
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,7 +15,8 @@ import java.io.File
 
 class NewsAdapter(
     private val onEditClick: (NewsEntity) -> Unit,
-    private val onDeleteClick: (NewsEntity) -> Unit
+    private val onDeleteClick: (NewsEntity) -> Unit,
+    private val onShareClick: (NewsEntity) -> Unit
 ) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
 
     private var items = listOf<NewsEntity>()
@@ -40,9 +42,10 @@ class NewsAdapter(
         private val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         private val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
         private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
-        private val ivImage: ImageView = itemView.findViewById(R.id.ivImage) // Убедитесь, что ID совпадает
+        private val ivImage: ImageView = itemView.findViewById(R.id.ivImage)
         private val btnEdit: ImageButton = itemView.findViewById(R.id.btnEdit)
         private val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
+        private val btnShare: ImageButton = itemView.findViewById(R.id.btnShare);
 
         fun bind(item: NewsEntity) {
             tvTitle.text = item.title
@@ -63,6 +66,7 @@ class NewsAdapter(
 
             btnEdit.setOnClickListener { onEditClick(item) }
             btnDelete.setOnClickListener { onDeleteClick(item) }
+            btnShare.setOnClickListener { onShareClick(item) }
         }
     }
 }
